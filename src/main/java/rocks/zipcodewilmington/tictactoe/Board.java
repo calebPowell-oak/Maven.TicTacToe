@@ -1,8 +1,6 @@
 package rocks.zipcodewilmington.tictactoe;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 /**
  * @author leon on 6/22/18.
@@ -10,19 +8,19 @@ import java.util.Arrays;
 public class Board {
 
     private Character[][] game;
+    private String[][] wins = {{"048","012","036"},{"012","147"},{"246","012","258"},
+                               {"345","036"},{"048","246","345","147"},{"345","258"},
+                               {"246","678","036"},{"678","147"},{"048","678","258"}};
+
+    private ArrayList<Integer> xHas = new ArrayList<Integer>();
+    private ArrayList<Integer> oHas = new ArrayList<Integer>();
 
     public Board(Character[][] matrix) {
         game = matrix;
+        buildHands();
     }
 
-    public Boolean isInFavorOfX() {
-        Integer xFavorability = 0;
-        Integer oFavorability = 0;
-        ArrayList<Integer> xHas = new ArrayList<Integer>();
-        ArrayList<Integer> oHas= new ArrayList<Integer>();
-        String[][] wins = {{"048","012","036"},{"012","147"},{"246","012","258"},
-                {"345","036"},{"048","246","345","147"},{"345","258"},
-                {"246","678","036"},{"678","147"},{"048","678","258"}};
+    public void buildHands(){
 
         for(int i = 0; i < game.length; i++){
             for(int j = 0; j < game[i].length; j++){
@@ -33,48 +31,115 @@ public class Board {
                 }
             }
         }
-        System.out.println(xHas);
-        System.out.println(oHas);;
-        for(Integer xnum:xHas){
-            System.out.println("For xnum = " + xnum+" in "+xHas);
-            for(String set:wins[xnum]){
-                System.out.println("For set: " + set);
-                for(Integer onum:oHas){
-                    System.out.println("Check for: " + onum + " in set: " + set);
-                    if(!set.contains(onum.toString())){
-                        System.out.println("Set "+set+" didn't contain: "+onum);
-                        System.out.println("Favorability for x went up.");
-                        xFavorability++;
-                        System.out.println("X favor = "+xFavorability);
-                    }
-                }
-            }
-        }
+    }
 
-        for(Integer onum:oHas){
-            for(String set:wins[onum]){
-                for(Integer xnum:xHas){
-                    if(!set.contains(xnum.toString())){
-                        oFavorability++;
+    public Boolean victoryPerHand(ArrayList<Integer> hand){
+        for(Integer num:hand){
+            for(String winningSet: wins[num]){
+                Integer inARow = 0;
+                for(int i = 0; i < hand.size(); i++){
+                    if(winningSet.contains(hand.get(i).toString())){
+                        inARow++;
                     }
+                    if(inARow == 3) return true;
                 }
             }
         }
-        System.out.println(xFavorability);
-        System.out.println(oFavorability);
-        return xFavorability > oFavorability;
+        return false;
+    }
+
+    public Boolean isInFavorOfX() {
+        if(victoryPerHand(xHas)){
+            return true;
+        } else if(victoryPerHand(oHas)) {
+            return false;
+        } else if(isTie()){
+            return false;
+        } else {
+            Integer xFavorability = 0;
+            Integer oFavorability = 0;
+
+            for (Integer xnum : xHas) {
+                for (String set : wins[xnum]) {
+                    for (Integer onum : oHas) {
+                        if (!set.contains(onum.toString())) {
+                            xFavorability++;
+                        }
+                    }
+                }
+            }
+
+            for (Integer onum : oHas) {
+                for (String set : wins[onum]) {
+                    for (Integer xnum : xHas) {
+                        if (!set.contains(xnum.toString())) {
+                            oFavorability++;
+                        }
+                    }
+                }
+            }
+            return xFavorability > oFavorability;
+        }
     }
 
     public Boolean isInFavorOfO() {
-        return !isInFavorOfX();
+        if(victoryPerHand(oHas)){
+            return true;
+        } else if(victoryPerHand(xHas)) {
+            return false;
+        } else if(isTie()){
+            return false;
+        } else {
+            Integer xFavorability = 0;
+            Integer oFavorability = 0;
+
+            for (Integer xnum : xHas) {
+                for (String set : wins[xnum]) {
+                    for (Integer onum : oHas) {
+                        if (!set.contains(onum.toString())) {
+                            xFavorability++;
+                        }
+                    }
+                }
+            }
+
+            for (Integer onum : oHas) {
+                for (String set : wins[onum]) {
+                    for (Integer xnum : xHas) {
+                        if (!set.contains(xnum.toString())) {
+                            oFavorability++;
+                        }
+                    }
+                }
+            }
+            return xFavorability < oFavorability;
+        }
     }
 
     public Boolean isTie() {
-        return null;
+        if(xHas.size()+oHas.size() == 9){
+            if(!victoryPerHand(xHas) && !victoryPerHand(oHas)){
+                return true;
+            }
+        }
+        return false;
     }
 
     public String getWinner() {
-        return null;
+        if(victoryPerHand(xHas)){
+            return "X";
+        } else if(victoryPerHand(oHas)){
+            return "O";
+        }
+        return "";
+    }
+
+    public ArrayList<Integer> getXHand(){
+        return xHas;
+    }
+
+    public ArrayList<Integer> getOHand(){
+        return oHas;
     }
 
 }
